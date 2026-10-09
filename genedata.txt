@@ -1,4 +1,4 @@
-﻿Romanchuk Margarita
+﻿Ivan Ivanov
 Genetic Searching
 --------------------------------------------------------------------------
 001   diff   PREDICTED: similar to double homeobox   metallothionein 2A 

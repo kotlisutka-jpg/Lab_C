@@ -1,7 +1,8 @@
 using System;
 using System.Text;
+ 
+namespace GeneticSearch
 
-namespace GeneticSearch.Services
 {
     public static class RleCodec
     { 
