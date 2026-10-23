@@ -57,7 +57,11 @@ namespace CatAndMouseGame
                 }
                 else if (parts.Length > 1 && int.TryParse(parts[1], out int steps))
                 {
-                    DoMoveCommand(commandType, steps);
+                    switch (commandType)
+                    {
+                        case 'M': mouse.Move(steps); break;
+                        case 'C': cat.Move(steps); break;
+                    }
 
                     if (cat.state == State.Playing && mouse.state == State.Playing && cat.location == mouse.location)
                     {
@@ -80,14 +84,14 @@ namespace CatAndMouseGame
             WriteLogToFile();
         }
 
-        private void DoMoveCommand(char command, int steps)
-        {
-            switch (command)
-            {
-                case 'M': mouse.Move(steps); break;
-                case 'C': cat.Move(steps); break;
-            }
-        }
+        /* private void DoMoveCommand(char command, int steps)
+         {
+             switch (command)
+             {
+                 case 'M': mouse.Move(steps); break;
+                 case 'C': cat.Move(steps); break;
+             }
+         } */
 
         private void DoPrintCommand()
         {
