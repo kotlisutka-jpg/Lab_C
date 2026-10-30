@@ -1,169 +1,126 @@
-using System;
+ using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml.Serialization;
 
 namespace TokenizerGame
-{ // переделать логику тестов: у нас должно быть уже нужный ответ и исходное значени, мы
-  // мы пропускаем наше исходное значение по функции теста и сравниваем с тем, что должно
-  // получиться в итиоге, и их сравнение и показывает работает ли код
+{
     public static class TokenizerTests
     {
         public static void RunAllTests(List<string> vocabulary)
         {
             Console.WriteLine("\n==================================================");
-            Console.WriteLine("        ЗАПУСК ТЭСТОВ ЛАБАРАТОРНАЙ РАБОТЫ №3       "); 
+            Console.WriteLine("        АВТОМАТИЧЕСКОЕ ТЕСТИРОВАНИЕ КЛАССОВ        ");
+            Console.WriteLine("==================================================");
 
             HashSet<string> stopWords = new HashSet<string>(vocabulary, StringComparer.OrdinalIgnoreCase);
 
-            Test_SentenceParsingAndSorting();
-            Test_QuestionSentenceSearch();
-            Test_RemoveWordsStartingWithConsonant();
-            Test_ReplaceWordsInSentence();
-            Test_StopWordsRemoval(stopWords);
-            Test_XmlSerialization();
- 
-            Console.WriteLine("\n              ТЭСТЫ ЗАВЕРШАНЫ                  ");
+            int passedTests = 0;
+            int totalTests = 6;
+
+            if (Test_SentenceSortingByWordCount()) passedTests++;
+            if (Test_SentenceSortingByLength()) passedTests++;
+            if (Test_QuestionSentenceSearch()) passedTests++;
+            if (Test_RemoveWordsStartingWithConsonant()) passedTests++;
+            if (Test_ReplaceWordsInSentence()) passedTests++;
+            if (Test_StopWordsRemoval(stopWords)) passedTests++;
+
+            Console.WriteLine("==================================================");
+            Console.WriteLine($"ИТОГ ТЕСТИРОВАНИЯ: Успешно пройдено {passedTests} из {totalTests} тестов.");
             Console.WriteLine("==================================================\n");
         }
 
-        private static void Test_SentenceParsingAndSorting()
+        private static bool AssertResult(string testName, string expected, string actual)
         {
-            Console.WriteLine("\n[ТЕСТ 1 и 2]: Сортировка предложений");
-            string testText = "Короткое слово. Это очень длинное предложение для теста. Среднее предложение тут.";
-            TextDocument doc = TextParser.Parse(testText);
-
-            Console.WriteLine("  > По возрастанию количества слов:");
-            var sortedByWords = doc.Sentences.OrderBy(s => s.Words.Count).ToList();
-            foreach (var s in sortedByWords)
+            if (expected.Trim() == actual.Trim())
             {
-                Console.WriteLine($"    - [{s.Words.Count} слов]: {s}");
-            }
-
-            Console.WriteLine("  > По возрастанию общей длины символов:");
-            var sortedByLength = doc.Sentences.OrderBy(s => s.ToString().Length).ToList();
-            foreach (var s in sortedByLength)
-            {
-                Console.WriteLine($"    - [{s.ToString().Length} симв.]: {s}");
-            }
-        }
-
-        private static void Test_QuestionSentenceSearch()
-        {
-            Console.WriteLine("\n[ТЕСТ 3]: Поиск в вопросительных предложениях");
-            string testText = "Это обычное предложение. Кто пришел? Что там произошло?";
-            TextDocument doc = TextParser.Parse(testText);
-            int targetLength = 3;
-
-            var words = doc.Sentences
-                .Where(s => s.IsQuestion)
-                .SelectMany(s => s.Words)
-                .Where(w => w.Length == targetLength)
-                .Select(w => w.Value.ToLower())
-                .Distinct()
-                .ToList();
-
-            Console.WriteLine($"  > Найденные слова длиной {targetLength} в вопросах (без повторов):");
-            if (words.Count > 0)
-            {
-                words.ForEach(w => Console.WriteLine($"    - {w}"));
+                Console.WriteLine($"[УСПЕХ] {testName}");
+                return true;
             }
             else
             {
-                Console.WriteLine("    - Слов не найдено.");
+                Console.WriteLine($"[ПРОВАЛ] {testName}");
+                Console.WriteLine($"  -> Ожидалось: '{expected}'");
+                Console.WriteLine($"  -> Получено:  '{actual}'");
+                return false;
             }
         }
 
-        private static void Test_RemoveWordsStartingWithConsonant()
+        private static bool Test_SentenceSortingByWordCount()
         {
-            Console.WriteLine("\n[ТЕСТ 4]: Удаление слов на согласную букву");
-            string testText = "Кот ел рыбу и пил воду.";
-            TextDocument doc = TextParser.Parse(testText);
-            int lengthToRemove = 3;
+            string sourceText = "Много слов тут. Мало. Среднее число слов.";
+            TextDocument doc = TextParser.Parse(sourceText);
 
-            Console.WriteLine("  > До удаления:");
-            doc.PrintText();
-            
-            foreach (var sentence in doc.Sentences)
-            {
-                sentence.Tokens.RemoveAll(t => t is Word w && w.Length == lengthToRemove && w.StartsWithConsonant());
-            }
+            string expectedOrder = "Мало. Много слов тут. Среднее число слов.";
 
-            Console.WriteLine($"  > После удаления слов длиной {lengthToRemove} на согласную:");
-            doc.PrintText();
+            var sortedSentences = doc.GetSentencesOrderedByWordCount();
+            string actualOrder = string.Join(" ", sortedSentences.Select(s => s.ToString()));
+
+            return AssertResult("Пункт 1: Сортировка по количеству слов", expectedOrder, actualOrder);
         }
 
-
-        private static void Test_ReplaceWordsInSentence()
+        private static bool Test_SentenceSortingByLength()
         {
-            Console.WriteLine("\n[ТЕСТ 5]: Замена слов в предложении на подстроку");
-            string testText = "Они купили новый дом.";
-            TextDocument doc = TextParser.Parse(testText);
-            int targetLength = 4;
-            string replacement = "[Глоорп]";
+            string sourceText = "Длинное предложение. Ого. Среднее слово.";
+            TextDocument doc = TextParser.Parse(sourceText);
 
-            if (doc.Sentences.Count > 0)
-            {
-                Console.WriteLine($"  > До замены: {doc.Sentences[0]}");
+            string expectedOrder = "Ого. Среднее слово. Длинное предложение.";
 
-                var sentence = doc.Sentences[0];
-                for (int i = 0; i < sentence.Tokens.Count; i++)
-                {
-                    if (sentence.Tokens[i] is Word w && w.Length == targetLength)
-                    {
-                        sentence.Tokens[i] = new Word(replacement);
-                    }
-                }
+            var sortedSentences = doc.GetSentencesOrderedByLength();
+            string actualOrder = string.Join(" ", sortedSentences.Select(s => s.ToString()));
 
-                Console.WriteLine($"  > После замены слов длиной {targetLength}:");
-            }
+            return AssertResult("Пункт 2: Сортировка по длине предложения", expectedOrder, actualOrder);
         }
 
-        private static void Test_StopWordsRemoval(HashSet<string> stopWords)
+        private static bool Test_QuestionSentenceSearch()
         {
-            Console.WriteLine("\n[ТЕСТ 6]: Удаление стоп-слов на основе словаря");
-            string testText = "они были многочисленные но меня уже не догнать.";
-            TextDocument doc = TextParser.Parse(testText);
+            string sourceText = "Это обычный текст. Кто там пришел? Что там?";
+            TextDocument doc = TextParser.Parse(sourceText);
 
-            Console.WriteLine("  > Текст до очистки:");
-            doc.PrintText();
+            string expectedWords = "кто, там, что";
 
-            foreach (var sentence in doc.Sentences)
-            {
-                sentence.Tokens.RemoveAll(t => t is Word w && stopWords.Contains(w.Value));
-            }
+            var actualList = doc.FindUniqueWordsInQuestions(length: 3);
+            string actualWords = string.Join(", ", actualList);
 
-            Console.WriteLine("  > Текст после удаления стоп-слов:");
-            doc.PrintText();
+            return AssertResult("Пункт 3: Поиск уникальных слов в вопросах", expectedWords, actualWords);
         }
 
-        private static void Test_XmlSerialization()
+        private static bool Test_RemoveWordsStartingWithConsonant()
         {
-            Console.WriteLine("\n[ТЕСТ 7]: Экспорт объекта Текст в XML");
-            string testText = "Mary had a lamb.";
-            TextDocument doc = TextParser.Parse(testText);
-            string testXmlPath = "test_output.xml";
+            string sourceText = "Кот ел рыбу и пил."; 
+            TextDocument doc = TextParser.Parse(sourceText);
 
-            try
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(TextDocument));
-                using (StreamWriter writer = new StreamWriter(testXmlPath, false, Encoding.UTF8))
-                {
-                    serializer.Serialize(writer, doc);
-                }
-                
-                if (File.Exists(testXmlPath))
-                {
-                    Console.WriteLine($"  > Тест пройден. Файл XML успешно создан. Размер: {new FileInfo(testXmlPath).Length} байт.");
-                    File.Delete(testXmlPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"  > [ОШИБКА ТЕСТА XML]: {ex.Message}");
-            }
+            string expectedText = "ел рыбу и.";
+
+            doc.RemoveWordsStartingWithConsonant(length: 3);
+            string actualText = string.Join(" ", doc.Sentences.Select(s => s.ToString()));
+
+            return AssertResult("Пункт 4: Удаление слов на согласную", expectedText, actualText);
+        }
+
+        private static bool Test_ReplaceWordsInSentence()
+        {   
+            string sourceText = "Этот тест наша проверка.";
+            TextDocument doc = TextParser.Parse(sourceText);
+
+            string expectedText = "[Глоорп] [Глоорп] [Глоорп] проверка.";
+
+            doc.ReplaceWordsInSentence(sentenceIndex: 0, length: 4, replacement: "[Глоорп]");
+            string actualText = doc.Sentences[0].ToString();
+
+            return AssertResult("Пункт 5: Замена слов заданной длины на подстроку", expectedText, actualText);
+        }
+
+        private static bool Test_StopWordsRemoval(HashSet<string> stopWords)
+        {
+            string sourceText = "они были многочисленны но меня уже не догнать.";
+            TextDocument doc = TextParser.Parse(sourceText);
+
+            string expectedText = "многочисленны догнать.";
+
+            doc.RemoveStopWords(stopWords);
+            string actualText = string.Join(" ", doc.Sentences.Select(s => s.ToString()));
+
+            return AssertResult("Пункт 6: Удаление стоп-слов по словарю", expectedText, actualText);
         }
     }
 }

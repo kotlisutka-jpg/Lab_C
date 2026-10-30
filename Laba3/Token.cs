@@ -30,7 +30,7 @@ namespace TokenizerGame
             if (string.IsNullOrEmpty(Value)) return false;
             char firstChar = char.ToLower(Value[0]);
             
-            string consonants = "bcdfghjklmnpqrstvwxyzбсгджзйклмнпрстфхцчшщ";      // Вынести логику констант в одельное, желательно файл и назвать его можно константы
+            string consonants = Constants.Consonants;     // Вынести логику констант в одельное, желательно файл и назвать его можно константы
             return consonants.Contains(firstChar);                                 // чтобы можно было их вызывать , а не прописывать
         }
     }

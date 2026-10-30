@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace TokenizerGame
@@ -11,15 +12,20 @@ namespace TokenizerGame
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("=== Запуск Лабораторной работы №3: Токенизатор ===\n");
+            Console.WriteLine("=== Запуск Лабораторной работы №3: Токенизатор ===\n"); 
 
-            string vocabPath = "vocabulary.txt";
+            string vocabPath = Constants.DefaultVocabularyPath;
+            string inputPath = Constants.DefaultInputPath;
+            string xmlFileName = Constants.DefaultXmlOutputPath;
+            string replacement = Constants.DefaultReplacement;
+
             if (!File.Exists(vocabPath)) return;
 
             List<string> vocabulary = File.ReadAllLines(vocabPath).Select(w => w.Trim()).Where(w => !string.IsNullOrEmpty(w)).ToList();
             HashSet<string> stopWords = new HashSet<string>(vocabulary, StringComparer.OrdinalIgnoreCase);
 
-            string inputPath = "input.txt";
+            TokenizerTests.RunAllTests(vocabulary);
+ 
             if (!File.Exists(inputPath))
             {
                 File.WriteAllText(inputPath, "Они были многочисленны, но меня уже не догнать. Кто это делал?", Encoding.UTF8);
@@ -44,9 +50,8 @@ namespace TokenizerGame
             var uniqueWords = doc.FindUniqueWordsInQuestions(targetLengthSearch);
             if (uniqueWords.Any()) uniqueWords.ForEach(w => Console.WriteLine($" - {w}"));
             else Console.WriteLine("Слов не найдено.");
-            
-            int targetLengthReplace = 4;
-            string replacement = "[Глоорп]";
+
+            int targetLengthReplace = 4; 
             Console.WriteLine($"\n-Пункт 5: Замена слов длиной {targetLengthReplace} на '{replacement}' в 1-ом предложении ");
             doc.ReplaceWordsInSentence(sentenceIndex: 0, targetLengthReplace, replacement);
             doc.PrintText();
@@ -60,8 +65,7 @@ namespace TokenizerGame
             doc.RemoveStopWords(stopWords);
             doc.PrintText();
 
-            Console.WriteLine("\n-Пункт 7: Экспорт в XML ");
-            string xmlFileName = "result_output.xml";
+            Console.WriteLine("\n-Пункт 7: Экспорт в XML "); 
             try
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(TextDocument));

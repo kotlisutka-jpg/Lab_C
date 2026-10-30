@@ -11,14 +11,14 @@ namespace TokenizerGame
             var document = new TextDocument();
             if (string.IsNullOrWhiteSpace(input)) return document;
 
-            string sentencePattern = @"(?<=[\.\?!])\s+|(?=[^\.\?!]*$)";   //Вынести логику констант в одельное, желательно файл и назвать его можно константы
+            string sentencePattern =  Constants.SentencePattern;  //Вынести логику констант в одельное, желательно файл и назвать его можно константы
             var rawSentences = Regex.Split(input, sentencePattern).Where(s => !string.IsNullOrWhiteSpace(s));
 
             foreach (var rawSentence in rawSentences)
             {
                 var sentence = new Sentence();
 
-                string tokenPattern = @"([a-zA-Zа-яА-ЯёЁ0-9']+(?:-[a-zA-Zа-яА-ЯёЁ0-9']+)*)|([^\s\w])";    //Вынести логику констант в одельное, желательно файл и назвать его можно константы;
+                string tokenPattern = Constants.TokenPattern;   //Вынести логику констант в одельное, желательно файл и назвать его можно константы;
                 var matches = Regex.Matches(rawSentence, tokenPattern);
 
                 foreach (Match match in matches)
