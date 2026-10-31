@@ -74,10 +74,10 @@ namespace TokenizerGame
         {
             return Sentences
                 .Where(s => s.IsQuestion)
-                .SelectMany(s => s.Words)     //разница selectMay и Salect
+                .SelectMany(s => s.Words)
                 .Where(w => w.Length == length)
                 .Select(w => w.Value.ToLower())
-                .Distinct()                   //что такое Distinct
+                .Distinct()
                 .ToList();
         }
 

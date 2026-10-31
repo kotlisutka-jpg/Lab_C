@@ -12,27 +12,50 @@ namespace TokenizerGame
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("=== Запуск Лабораторной работы №3: Токенизатор ===\n"); 
+            Console.WriteLine("=== Запуск Лабораторной работы №3: Токенизатор ===\n");
 
-            string vocabPath = Constants.DefaultVocabularyPath;
-            string inputPath = Constants.DefaultInputPath;
-            string xmlFileName = Constants.DefaultXmlOutputPath;
-            string replacement = Constants.DefaultReplacement;
+            Console.Write($"Введите путь к файлу словаря (нажмите Enter для значения по умолчанию '{Constants.DefaultVocabularyPath}'): ");
+            string vocabPath = Console.ReadLine();
 
-            if (!File.Exists(vocabPath)) return;
+            if (string.IsNullOrWhiteSpace(vocabPath))
+            {
+                vocabPath = Constants.DefaultVocabularyPath;
+            }
 
-            List<string> vocabulary = File.ReadAllLines(vocabPath).Select(w => w.Trim()).Where(w => !string.IsNullOrEmpty(w)).ToList();
+            if (!File.Exists(vocabPath))
+            {
+                Console.WriteLine($"Ошибка: Файл словаря '{vocabPath}' не найден.");
+                return;
+            }
+
+            List<string> vocabulary = File.ReadAllLines(vocabPath)
+                                           .Select(w => w.Trim())
+                                           .Where(w => !string.IsNullOrEmpty(w))
+                                           .ToList();
             HashSet<string> stopWords = new HashSet<string>(vocabulary, StringComparer.OrdinalIgnoreCase);
 
             TokenizerTests.RunAllTests(vocabulary);
- 
+
+            Console.Write($"Введите путь к файлу с исходным текстом (нажмите Enter для значения по умолчанию '{Constants.DefaultInputPath}'): ");
+            string inputPath = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(inputPath))
+            {
+                inputPath = Constants.DefaultInputPath;
+            }
             if (!File.Exists(inputPath))
             {
                 File.WriteAllText(inputPath, "Они были многочисленны, но меня уже не догнать. Кто это делал?", Encoding.UTF8);
+                Console.WriteLine($"[Инфо]: Файл '{inputPath}' не найден, создан автоматически с тестовым текстом.");
             }
+
             string inputText = File.ReadAllText(inputPath, Encoding.UTF8);
 
+            string xmlFileName = Constants.DefaultXmlOutputPath;
+            string replacement = Constants.DefaultReplacement;
+
             TextDocument doc = TextParser.Parse(inputText);
+            
 
             Console.WriteLine("Исходный текст:");
             doc.PrintText();
@@ -51,7 +74,7 @@ namespace TokenizerGame
             if (uniqueWords.Any()) uniqueWords.ForEach(w => Console.WriteLine($" - {w}"));
             else Console.WriteLine("Слов не найдено.");
 
-            int targetLengthReplace = 4; 
+            int targetLengthReplace = 4;
             Console.WriteLine($"\n-Пункт 5: Замена слов длиной {targetLengthReplace} на '{replacement}' в 1-ом предложении ");
             doc.ReplaceWordsInSentence(sentenceIndex: 0, targetLengthReplace, replacement);
             doc.PrintText();
@@ -65,7 +88,7 @@ namespace TokenizerGame
             doc.RemoveStopWords(stopWords);
             doc.PrintText();
 
-            Console.WriteLine("\n-Пункт 7: Экспорт в XML "); 
+            Console.WriteLine("\n-Пункт 7: Экспорт в XML ");
             try
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(TextDocument));
