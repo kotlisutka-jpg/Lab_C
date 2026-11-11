@@ -11,35 +11,42 @@ namespace TokenizerGame
             var document = new TextDocument();
             if (string.IsNullOrWhiteSpace(input)) return document;
 
-            string sentencePattern =  Constants.SentencePattern;  //Вынести логику констант в одельное, желательно файл и назвать его можно константы
-            var rawSentences = Regex.Split(input, sentencePattern).Where(s => !string.IsNullOrWhiteSpace(s));
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var currentSentence = new Sentence();
 
-            foreach (var rawSentence in rawSentences)
+            for (int i = 0; i < lines.Length; i++)
             {
-                var sentence = new Sentence();
-
-                string tokenPattern = Constants.TokenPattern;   //Вынести логику констант в одельное, желательно файл и назвать его можно константы;
-                var matches = Regex.Matches(rawSentence, tokenPattern);
+                int lineNumber = i + 1;
+                var matches = Regex.Matches(lines[i], Constants.TokenPattern);
 
                 foreach (Match match in matches)
                 {
-                    if (char.IsLetterOrDigit(match.Value[0]))
+                    string tokenValue = match.Value;
+
+                    if (char.IsLetterOrDigit(tokenValue[0]))
                     {
-                        sentence.Tokens.Add(new Word(match.Value));
+                        currentSentence.Tokens.Add(new Word(tokenValue, lineNumber));
                     }
                     else
                     {
-                        sentence.Tokens.Add(new Punctuation(match.Value));
+                        currentSentence.Tokens.Add(new Punctuation(tokenValue, lineNumber));
+
+                        if (tokenValue == "." || tokenValue == "!" || tokenValue == "?")
+                        {
+                            document.Sentences.Add(currentSentence);
+                            currentSentence = new Sentence();
+                        }
                     }
                 }
+            }
 
-                if (sentence.Tokens.Count > 0)
-                {
-                    document.Sentences.Add(sentence);
-                }
+            if (currentSentence.Tokens.Count > 0)
+            {
+                document.Sentences.Add(currentSentence);
             }
 
             return document;
         }
     }
 }
+

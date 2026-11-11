@@ -112,5 +112,50 @@ namespace TokenizerGame
                 Console.WriteLine(sentence.ToString());
             }
         }
+
+                public Dictionary<string, ConcordanceEntry> BuildConcordance()
+        {
+            var concordance = new Dictionary<string, ConcordanceEntry>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var sentence in Sentences)
+            {
+                foreach (var word in sentence.Words)
+                {
+                    string key = word.Value.ToLower();
+
+                    if (!concordance.ContainsKey(key))
+                    {
+                        concordance[key] = new ConcordanceEntry();
+                    }
+
+                    concordance[key].AddOccurrence(word.LineNumber);
+                }
+            }
+
+            return concordance
+                .OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                .ToDictionary(pair => pair.Key, pair => pair.Value);
+        }
+
+        public string GetFormattedConcordance(int totalWidth = 35)
+        {
+            var concordance = BuildConcordance();
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var entry in concordance)
+            {
+                string word = entry.Key;
+                int count = entry.Value.Frequency;
+                string lines = string.Join(" ", entry.Value.LineNumbers);
+
+                int dotsCount = Math.Max(2, totalWidth - word.Length);
+                string dots = new string('.', dotsCount);
+
+                sb.AppendLine($"{word}{dots}{count}: {lines}");
+            }
+
+            return sb.ToString().TrimEnd();
+        }
+
     }
 }

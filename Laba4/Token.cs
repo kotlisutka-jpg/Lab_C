@@ -11,8 +11,15 @@ namespace TokenizerGame
         [XmlText]
         public string Value { get; set; }
 
+        [XmlIgnore]
+        public int LineNumber { get; set; }
+
         protected Token() { }
-        protected Token(string value) { Value = value; }
+        protected Token(string value, int lineNumber = 1)
+        {
+            Value = value;
+            LineNumber = lineNumber;
+        }
 
         public override string ToString() => Value;
     }
@@ -20,7 +27,7 @@ namespace TokenizerGame
     public class Word : Token
     {
         public Word() : base() { }
-        public Word(string value) : base(value) { }
+        public Word(string value, int lineNumber = 1) : base(value, lineNumber) { }
 
         [XmlIgnore]
         public int Length => Value.Length;
@@ -29,15 +36,14 @@ namespace TokenizerGame
         {
             if (string.IsNullOrEmpty(Value)) return false;
             char firstChar = char.ToLower(Value[0]);
-            
-            string consonants = Constants.Consonants;     // Вынести логику констант в одельное, желательно файл и назвать его можно константы
-            return consonants.Contains(firstChar);                                 // чтобы можно было их вызывать , а не прописывать
+            return Constants.Consonants.Contains(firstChar);
         }
     }
 
     public class Punctuation : Token
     {
         public Punctuation() : base() { }
-        public Punctuation(string value) : base(value) { }
+        public Punctuation(string value, int lineNumber = 1) : base(value, lineNumber) { }
     }
 }
+

@@ -12,7 +12,7 @@ namespace TokenizerGame
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Console.WriteLine("=== Запуск Лабораторной работы №3: Токенизатор ===\n");
+            Console.WriteLine("=== Запуск Лабораторной работы №4: Токенизатор и Конкорданс ===\n");
 
             Console.Write($"Введите путь к файлу словаря (нажмите Enter для значения по умолчанию '{Constants.DefaultVocabularyPath}'): ");
             string vocabPath = Console.ReadLine();
@@ -54,12 +54,17 @@ namespace TokenizerGame
             string xmlFileName = Constants.DefaultXmlOutputPath;
             string replacement = Constants.DefaultReplacement;
 
+            // 1. Сначала создаем объект doc
             TextDocument doc = TextParser.Parse(inputText);
 
-
-            Console.WriteLine("Исходный текст:");
+            Console.WriteLine("\nИсходный текст:");
             doc.PrintText();
 
+            // 2. Выводим конкорданс для исходного текста (до того, как пункты 4-6 удалят из него слова)
+            Console.WriteLine("\n--- Лабораторная №4: Конкорданс исходного текста ---");
+            Console.WriteLine(doc.GetFormattedConcordance());
+
+            // 3. Далее идут пункты из Лабораторной №3
             Console.WriteLine("\n-Пункт 1: Предложения по возрастанию кол. слов ");
             var sortedByWords = doc.GetSentencesOrderedByWordCount();
             sortedByWords.ForEach(s => Console.WriteLine($"[{s.Words.Count} слов] {s}"));
@@ -104,3 +109,4 @@ namespace TokenizerGame
         }
     }
 }
+

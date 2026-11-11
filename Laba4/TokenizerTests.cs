@@ -1,4 +1,4 @@
- using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +15,7 @@ namespace TokenizerGame
             HashSet<string> stopWords = new HashSet<string>(vocabulary, StringComparer.OrdinalIgnoreCase);
 
             int passedTests = 0;
-            int totalTests = 6;
+            int totalTests = 7;
 
             if (Test_SentenceSortingByWordCount()) passedTests++;
             if (Test_SentenceSortingByLength()) passedTests++;
@@ -23,6 +23,7 @@ namespace TokenizerGame
             if (Test_RemoveWordsStartingWithConsonant()) passedTests++;
             if (Test_ReplaceWordsInSentence()) passedTests++;
             if (Test_StopWordsRemoval(stopWords)) passedTests++;
+            if (Test_Concordance()) passedTests++;
 
             Console.WriteLine("==================================================");
             Console.WriteLine($"ИТОГ ТЕСТИРОВАНИЯ: Успешно пройдено {passedTests} из {totalTests} тестов.");
@@ -122,5 +123,37 @@ namespace TokenizerGame
 
             return AssertResult("Пункт 6: Удаление стоп-слов по словарю", expectedText, actualText);
         }
+
+        private static bool Test_Concordance()
+        {
+            string sourceText = 
+                "Peter Piper picked a peck of pickled peppers. A peck of pickled\n" +
+                "peppers Peter Piper picked. If Peter Piper picked a peck of\n" +
+                "pickled peppers, where is the peck that Peter Piper picked?";
+
+            TextDocument doc = TextParser.Parse(sourceText);
+
+            string expectedConcordance = string.Join(Environment.NewLine, new[]
+            {
+                "a..................................3: 1 2",
+                "if.................................1: 2",
+                "is.................................1: 3",
+                "of.................................3: 1 2",
+                "peck...............................4: 1 2 3",
+                "peppers............................3: 1 2 3",
+                "peter..............................4: 1 2 3",
+                "picked.............................4: 1 2 3",
+                "pickled............................3: 1 3",
+                "piper..............................4: 1 2 3",
+                "that...............................1: 3",
+                "the................................1: 3",
+                "where..............................1: 3"
+            });
+
+            string actualConcordance = doc.GetFormattedConcordance(totalWidth: 35);
+
+            return AssertResult("Лаба 4: Построение конкорданса (Dictionary + SortedSet)", expectedConcordance, actualConcordance);
+        }
+
     }
 }
