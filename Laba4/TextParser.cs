@@ -31,7 +31,7 @@ namespace TokenizerGame
                     {
                         currentSentence.Tokens.Add(new Punctuation(tokenValue, lineNumber));
 
-                        if (tokenValue == "." || tokenValue == "!" || tokenValue == "?")
+                        if (Constants.SentenceEndings.Contains(tokenValue))
                         {
                             document.Sentences.Add(currentSentence);
                             currentSentence = new Sentence();

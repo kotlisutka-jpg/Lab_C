@@ -113,7 +113,7 @@ namespace TokenizerGame
             }
         }
 
-                public Dictionary<string, ConcordanceEntry> BuildConcordance()
+        public Dictionary<string, ConcordanceEntry> BuildConcordance()
         {
             var concordance = new Dictionary<string, ConcordanceEntry>(StringComparer.OrdinalIgnoreCase);
 
