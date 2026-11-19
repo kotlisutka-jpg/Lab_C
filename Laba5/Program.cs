@@ -10,6 +10,8 @@ namespace NewYearGiftProject
         {
             Console.OutputEncoding = Encoding.UTF8;
 
+            GiftTests.RunAllTests();
+
             NewYearGift kidsGift = new GiftBuilder("Чароўная казка")
                 .AddChocolate("Знiчка", 15.5, 8.2, 55, "шоколадно-ореховая")
                 .AddCaramel("Дюшес", 6.0, 5.4, "груша")
